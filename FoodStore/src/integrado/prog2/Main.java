@@ -7,7 +7,12 @@ import integrado.prog2.dao.CategoriaDAO;
 import integrado.prog2.service.FoodStoreService;
 import integrado.prog2.exception.EntityNotFoundException;
 import java.util.Scanner;
-
+import integrado.prog2.dao.PedidoDAO;
+import integrado.prog2.dao.DetallePedidoDAO;
+import integrado.prog2.dao.UsuarioDAO;
+import integrado.prog2.service.PedidoService;
+import integrado.prog2.enums.Estado;
+import integrado.prog2.enums.FormaPago;
 
 /**
  *
@@ -17,7 +22,10 @@ public class Main {
     private static final CategoriaDAO categoriaDAO = new CategoriaDAO();
     private static final FoodStoreService servicio = new FoodStoreService(categoriaDAO);
     private static final Scanner leer = new Scanner(System.in);
-
+    private static final UsuarioDAO usuarioDAO = new UsuarioDAO();
+    private static final PedidoDAO pedidoDAO = new PedidoDAO();
+    private static final DetallePedidoDAO detallePedidoDAO = new DetallePedidoDAO();
+    private static final PedidoService pedidoService = new PedidoService(pedidoDAO, detallePedidoDAO, usuarioDAO);
     public static void main(String[] args) {
         int opcion;
         // PRUEBA DE CONEXION PROVISORIA
@@ -48,7 +56,8 @@ public class Main {
 
             switch (opcion) {
                 case 1 -> menuCategorias();
-                case 2, 3, 4 -> System.out.println("[Proximamente] ");
+                case 2, 3 -> System.out.println("[Proximamente] ");
+                case 4 -> menuPedidos();
                 case 0 -> System.out.println("Saliendo del sistema...");
             }
         } while (opcion != 0);
@@ -128,5 +137,135 @@ public class Main {
         }
         
     } while (op != 0); // El bucle se repetira mientras la opcion no sea 0
+}
+    private static void menuPedidos() {
+    int op;
+
+    do {
+        System.out.println("\n--- SUB MENU GESTION DE PEDIDOS ---");
+        System.out.println("1. Listar pedidos");
+        System.out.println("2. Crear pedido");
+        System.out.println("3. Agregar detalle a pedido");
+        System.out.println("4. Cambiar estado y forma de pago");
+        System.out.println("5. Eliminar pedido");
+        System.out.println("0. Volver al menu principal");
+        System.out.print("Seleccione una opcion: ");
+
+        try {
+            op = Integer.parseInt(leer.nextLine());
+
+            switch (op) {
+                case 1 -> {
+                    var pedidos = pedidoService.listarPedidos();
+
+                    if (pedidos.isEmpty()) {
+                        System.out.println("No hay pedidos cargados.");
+                    } else {
+                        System.out.println("\n--- PEDIDOS ENCONTRADOS ---");
+                        pedidos.forEach(System.out::println);
+                    }
+                }
+
+                case 2 -> {
+                    System.out.print("Ingrese ID del usuario: ");
+                    Long usuarioId = Long.parseLong(leer.nextLine());
+
+                    FormaPago formaPago = seleccionarFormaPago();
+
+                    var pedido = pedidoService.iniciarPedido(usuarioId, formaPago);
+
+                    System.out.println("Pedido creado exitosamente con ID: " + pedido.getId());
+                }
+
+                case 3 -> {
+                    System.out.print("Ingrese ID del pedido: ");
+                    Long pedidoId = Long.parseLong(leer.nextLine());
+
+                    System.out.print("Ingrese ID del producto: ");
+                    Long productoId = Long.parseLong(leer.nextLine());
+
+                    System.out.print("Ingrese cantidad: ");
+                    int cantidad = Integer.parseInt(leer.nextLine());
+
+                    pedidoService.agregarDetalleAPedido(pedidoId, productoId, cantidad);
+
+                    System.out.println("Detalle agregado correctamente. Stock y total actualizados.");
+                }
+
+                case 4 -> {
+                    System.out.print("Ingrese ID del pedido: ");
+                    Long pedidoId = Long.parseLong(leer.nextLine());
+
+                    Estado estado = seleccionarEstado();
+                    FormaPago formaPago = seleccionarFormaPago();
+
+                    pedidoService.actualizarEstadoYFormaPago(pedidoId, estado, formaPago);
+
+                    System.out.println("Pedido actualizado correctamente.");
+                }
+
+                case 5 -> {
+                    System.out.print("Ingrese ID del pedido a eliminar: ");
+                    Long pedidoId = Long.parseLong(leer.nextLine());
+
+                    System.out.print("¿Confirma eliminar el pedido? S/N: ");
+                    String confirma = leer.nextLine();
+
+                    if (confirma.equalsIgnoreCase("S")) {
+                        pedidoService.eliminarPedido(pedidoId);
+                        System.out.println("Pedido eliminado logicamente.");
+                    } else {
+                        System.out.println("Operacion cancelada.");
+                    }
+                }
+
+                case 0 -> System.out.println("Regresando al menu principal...");
+
+                default -> System.out.println("Opcion no valida.");
+            }
+
+        } catch (NumberFormatException e) {
+            System.out.println("Error: debe ingresar un numero valido.");
+            op = -1;
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            op = -1;
+        }
+
+    } while (op != 0);
+}
+    private static Estado seleccionarEstado() {
+    System.out.println("\nSeleccione estado:");
+    System.out.println("1. PENDIENTE");
+    System.out.println("2. CONFIRMADO");
+    System.out.println("3. TERMINADO");
+    System.out.println("4. CANCELADO");
+    System.out.print("Opcion: ");
+
+    int opcion = Integer.parseInt(leer.nextLine());
+
+    return switch (opcion) {
+        case 1 -> Estado.PENDIENTE;
+        case 2 -> Estado.CONFIRMADO;
+        case 3 -> Estado.TERMINADO;
+        case 4 -> Estado.CANCELADO;
+        default -> throw new RuntimeException("Estado invalido.");
+    };
+}
+    private static FormaPago seleccionarFormaPago() {
+    System.out.println("\nSeleccione forma de pago:");
+    System.out.println("1. TARJETA");
+    System.out.println("2. TRANSFERENCIA");
+    System.out.println("3. EFECTIVO");
+    System.out.print("Opcion: ");
+
+    int opcion = Integer.parseInt(leer.nextLine());
+
+    return switch (opcion) {
+        case 1 -> FormaPago.TARJETA;
+        case 2 -> FormaPago.TRANSFERENCIA;
+        case 3 -> FormaPago.EFECTIVO;
+        default -> throw new RuntimeException("Forma de pago invalida.");
+    };
 }
 }
