@@ -23,6 +23,18 @@ CREATE TABLE productos (
     FOREIGN KEY (categoria_id) REFERENCES categoria(id)
 );
 
+CREATE TABLE usuario (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    mail VARCHAR(150) NOT NULL,
+    celular VARCHAR(20),
+    contrasenia VARCHAR(255) NOT NULL,
+    rol VARCHAR(50) NOT NULL,
+    eliminado BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE pedido (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     fecha DATE NOT NULL,
@@ -63,3 +75,21 @@ VALUES ('Hamburguesa clásica', 'Carne, lechuga, tomate y queso', 4500.00, 20, '
 
 INSERT INTO productos (nombre, descripcion, precio, stock, imagen, disponible, categoria_id)
 VALUES ('Papas fritas', 'Porción individual', 2200.00, 35, 'papas.png', true, 2);
+
+INSERT INTO pedido (fecha, estado, total, forma_pago, usuario_id) VALUES
+('2025-06-01', 'CONFIRMADO', 1500.00, 'EFECTIVO', 1),
+('2025-06-03', 'PENDIENTE', 2300.50, 'TARJETA', 2),
+('2025-06-05', 'TERMINADO', 800.00, 'TRANSFERENCIA', 1),
+('2025-06-10', 'CANCELADO', 450.00, 'EFECTIVO', 3),
+('2025-06-15', 'PENDIENTE', 3200.00, 'TARJETA', 2);
+
+-- DETALLES DE PEDIDO
+INSERT INTO detalle_pedido (cantidad, subtotal, pedido_id, producto_id) VALUES
+(2, 600.00, 1, 1),
+(1, 900.00, 1, 3),
+(3, 1200.00, 2, 2),
+(1, 1100.50, 2, 5),
+(2, 800.00, 3, 4),
+(1, 450.00, 4, 1),
+(4, 2000.00, 5, 3),
+(2, 1200.00, 5, 2);
