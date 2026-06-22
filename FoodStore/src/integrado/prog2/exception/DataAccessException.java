@@ -1,4 +1,4 @@
-package foodstore.exception;
+package integrado.prog2.exception;
 
 public class DataAccessException extends RuntimeException {
     public DataAccessException(String mensaje, Throwable causa) {
