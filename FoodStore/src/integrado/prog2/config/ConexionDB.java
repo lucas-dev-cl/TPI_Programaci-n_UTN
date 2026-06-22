@@ -14,7 +14,9 @@ import java.sql.SQLException;
 public class ConexionDB {
    private static final String URL = "jdbc:mysql://localhost:3306/pedidos_db";
     private static final String USER = "root";
-    private static final String PASS = "root"; 
+    private static final String PASS = System.getenv("PASSWORD_DB") != null
+            ? System.getenv("PASSWORD_DB")
+            : "root";
 
     public static Connection getConexion() throws SQLException {
         try {
