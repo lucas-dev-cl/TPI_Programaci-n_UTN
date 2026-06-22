@@ -2,6 +2,7 @@ package integrado.prog2.menus;
 
 import integrado.prog2.dao.CategoriaDAO;
 import integrado.prog2.dao.ProductoDAO;
+import integrado.prog2.dao.UsuarioDAO;
 import integrado.prog2.entities.Categoria;
 import integrado.prog2.entities.Producto;
 import integrado.prog2.exception.CategoriaNoValidaException;
@@ -24,6 +25,7 @@ public class ProductoMenu {
 
     private ProductoDAO productoDAO = new ProductoDAO();
     private CategoriaDAO categoriaDAO = new CategoriaDAO();
+    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
     private FoodStoreService foodStoreService = new FoodStoreService(categoriaDAO);
 
     private final ProductoService productoService = new ProductoService(productoDAO, categoriaDAO);

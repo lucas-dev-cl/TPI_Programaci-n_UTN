@@ -11,33 +11,33 @@ import java.util.List;
 
 public class UsuarioDAO {
 
-    public void crear(Usuario usuario) {
+    public Long crear(String nombre, String apellido, String mail, String celular, String contrasenia, Rol rol) {
+        String sql = "INSERT INTO usuario(nombre, apellido, mail, celular, contrasenia, rol, eliminado) VALUES(?,?,?,?,?,?,?)";
 
-        String sql =
-        "INSERT INTO usuario(nombre,apellido,mail,celular,contrasenia,rol,eliminado) VALUES(?,?,?,?,?,?,?)";
+        try (Connection con = ConexionDB.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-        try(Connection con = ConexionDB.getConexion();
-            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            ps.setString(1, usuario.getNombre());
-            ps.setString(2, usuario.getApellido());
-            ps.setString(3, usuario.getMail());
-            ps.setString(4, usuario.getCelular());
-            ps.setString(5, usuario.getContrasenia());
-            ps.setString(6, usuario.getRol().name());
-            ps.setBoolean(7, usuario.isEliminado());
+            ps.setString(1, nombre);
+            ps.setString(2, apellido);
+            ps.setString(3, mail);
+            ps.setString(4, celular);
+            ps.setString(5, contrasenia);
+            ps.setString(6, rol.name());
+            ps.setBoolean(7, false);
 
             ps.executeUpdate();
 
-            try(ResultSet rs = ps.getGeneratedKeys()) {
-                if(rs.next()) {
-                    usuario.setId(rs.getLong(1));
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) {
+                    return keys.getLong(1);
                 }
             }
 
-        } catch(SQLException e) {
-            throw new DataAccessException("Error al crear usuario", e);
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al crear usuario: " + e.getMessage());
         }
+
+        return null;
     }
 
     public List<Usuario> listar() {
@@ -112,7 +112,7 @@ public class UsuarioDAO {
     public void actualizar(Usuario usuario) {
 
         String sql =
-        "UPDATE usuario SET nombre=?, apellido=?, mail=?, celular=?, contrasenia=?, rol=? WHERE id=?";
+        "UPDATE usuario SET nombre=?, apellido=?, mail=?, celular=?, contrasenia=?, rol=? WHERE id=? AND eliminado = false";
 
         try(Connection con = ConexionDB.getConexion();
             PreparedStatement ps = con.prepareStatement(sql)) {
@@ -147,5 +147,26 @@ public class UsuarioDAO {
         } catch(SQLException e) {
             throw new DataAccessException("Error al eliminar usuario", e);
         }
+    }
+
+    public boolean existeMail(String mail) {
+        String sql = "SELECT COUNT(*) FROM usuario WHERE mail = ? AND eliminado = FALSE";
+
+        try (Connection con = ConexionDB.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, mail);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al verificar mail: " + e.getMessage());
+        }
+
+        return false;
     }
 }
