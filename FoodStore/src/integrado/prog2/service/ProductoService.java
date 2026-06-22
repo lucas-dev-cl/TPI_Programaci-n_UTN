@@ -29,6 +29,21 @@ public class ProductoService {
     }
 
     /**
+     * Obtenemos los productos de una categoría específica
+     * @param categoriaId id de la categoría por la cual filtrar
+     * @return lista de productos que pertenecen a esa categoría
+     */
+    public List<Producto> listarProductosPorCategoria(Long categoriaId) {
+        Categoria categoria = categoriaDAO.buscarPorId(categoriaId);
+        if (categoria == null) {
+            throw new CategoriaNoValidaException(
+                    "La categoría con id " + categoriaId + " no existe o fue eliminada"
+            );
+        }
+        return productoDAO.listarPorCategoria(categoriaId);
+    }
+
+    /**
      * Método para crear un producto utilizando DAO para la BD
      * @param producto Obtenemos el objeto ya creado desde el menú
      * @return retornamos el ID del objeto creado

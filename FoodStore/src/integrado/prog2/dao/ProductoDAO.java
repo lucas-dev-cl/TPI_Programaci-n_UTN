@@ -113,6 +113,33 @@ public class ProductoDAO {
         return productos;
     }
 
+    public List<Producto> listarPorCategoria(Long categoriaId) {
+        String sql = "SELECT p.id, p.nombre, p.descripcion, p.precio, p.stock, p.imagen, " +
+                "p.disponible, p.categoria_id, c.nombre AS categoria_nombre " +
+                "FROM productos p " +
+                "JOIN categoria c ON p.categoria_id = c.id " +
+                "WHERE p.eliminado = false AND p.categoria_id = ?";
+
+        List<Producto> productos = new ArrayList<>();
+
+        try (Connection conn = ConexionDB.getConexion();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, categoriaId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    productos.add(mapearProducto(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new DataAccessException("Error al listar productos de la categoría " + categoriaId, e);
+        }
+
+        return productos;
+    }
+
     public void eliminarProducto(Long id) {
         String sql = "UPDATE productos SET eliminado = true WHERE id = ?";
 

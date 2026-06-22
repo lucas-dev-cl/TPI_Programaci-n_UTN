@@ -2,11 +2,13 @@ package integrado.prog2.menus;
 
 import integrado.prog2.dao.CategoriaDAO;
 import integrado.prog2.dao.ProductoDAO;
+import integrado.prog2.entities.Categoria;
 import integrado.prog2.entities.Producto;
 import integrado.prog2.exception.CategoriaNoValidaException;
 import integrado.prog2.exception.DataAccessException;
 import integrado.prog2.exception.DatosInvalidosException;
 import integrado.prog2.exception.ProductoNoEncontradoException;
+import integrado.prog2.service.FoodStoreService;
 import integrado.prog2.service.ProductoService;
 
 import java.util.List;
@@ -22,6 +24,7 @@ public class ProductoMenu {
 
     private ProductoDAO productoDAO = new ProductoDAO();
     private CategoriaDAO categoriaDAO = new CategoriaDAO();
+    private FoodStoreService foodStoreService = new FoodStoreService(categoriaDAO);
 
     private final ProductoService productoService = new ProductoService(productoDAO, categoriaDAO);
 
@@ -60,15 +63,63 @@ public class ProductoMenu {
     }
 
     private void listar() {
-        List<Producto> productos = productoService.listarProductos();
+        System.out.println("\n¿Cómo desea listar los productos?");
+        System.out.println("1. Todos los productos");
+        System.out.println("2. Filtrar por categoría");
+        System.out.print("Seleccione: ");
 
-        if (productos.isEmpty()) {
-            System.out.println("No hay productos registrados");
+        int opcion = leerOpcion();
+
+        List<Producto> productos;
+
+        switch (opcion) {
+            case 1 -> productos = productoService.listarProductos();
+            case 2 -> {
+                mostrarCategoriasDisponibles();
+
+                Long categoriaId = leerLong("Ingrese el ID de la categoría: ");
+                if (categoriaId == null) return;
+
+                try {
+                    productos = productoService.listarProductosPorCategoria(categoriaId);
+                } catch (CategoriaNoValidaException e) {
+                    System.out.println("No se pudo listar: " + e.getMessage());
+                    return;
+                }
+            }
+            default -> {
+                System.out.println("Opción no válida");
+                return;
+            }
+        }
+
+        mostrarProductos(productos);
+    }
+
+    private void mostrarCategoriasDisponibles() {
+        List<Categoria> categorias = foodStoreService.obtenerCategoriasActivas();
+
+        if (categorias.isEmpty()) {
+            System.out.println("No hay categorías registradas");
             return;
         }
 
+        System.out.println("\n--- CATEGORÍAS DISPONIBLES ---");
+        for (Categoria c : categorias) {
+            System.out.println(c.getId() + " - " + c.getNombre());
+        }
+    }
+
+    private void mostrarProductos(List<Producto> productos) {
+        if (productos.isEmpty()) {
+            System.out.println("No hay productos para mostrar");
+            return;
+        }
+
+        System.out.println("\n--- PRODUCTOS ---");
         for (Producto p : productos) {
-            System.out.println(p.getId() + " - " + p.getNombre() + " - $" + p.getPrecio() + " - stock: " + p.getStock());
+            System.out.println(p.getId() + " - " + p.getNombre() + " - $" + p.getPrecio() +
+                    " - stock: " + p.getStock() + " - ID Categoria: " + p.getCategoriaId());
         }
     }
 
