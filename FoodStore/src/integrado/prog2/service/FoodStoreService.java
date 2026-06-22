@@ -5,6 +5,8 @@
 package integrado.prog2.service;
 import integrado.prog2.dao.CategoriaDAO;
 import integrado.prog2.entities.Categoria;
+import integrado.prog2.exception.CategoriaException;
+import integrado.prog2.exception.CategoriaNotFoundException;
 import integrado.prog2.exception.EntityNotFoundException;
 import java.sql.SQLException;
 import java.util.List;
@@ -15,39 +17,43 @@ import java.util.List;
  * @author Lila
  */
 public class FoodStoreService {
-    private final CategoriaDAO categoriaDAO = new CategoriaDAO();
+    private final CategoriaDAO categoriaDAO;
 
-    public void registrarCategoria(String nombre, String descripcion) throws Exception {
+    public FoodStoreService(CategoriaDAO categoriaDAO) {
+        this.categoriaDAO = categoriaDAO;
+    }
+
+    public void registrarCategoria(String nombre, String descripcion){
         if (nombre == null || nombre.trim().isEmpty()) {
-            throw new Exception("El nombre no puede estar vacio.");
+            throw new CategoriaException("El nombre no puede estar vacio.");
         }
         List<Categoria> actuales = categoriaDAO.listar();
         for (Categoria c : actuales) {
             if (c.getNombre().equalsIgnoreCase(nombre)) {
-                throw new Exception("Error: Ya existe una categoria activa con ese nombre.");
+                throw new CategoriaException("Error: Ya existe una categoria activa con ese nombre.");
             }
         }
         Categoria nueva = new Categoria(null, nombre, descripcion);
         categoriaDAO.crear(nueva);
     }
 
-    public List<Categoria> obtenerCategoriasActivas() throws SQLException {
+    public List<Categoria> obtenerCategoriasActivas() {
         return categoriaDAO.listar();
     }
 
-    public void darBajaLogicaCategoria(Long id) throws SQLException, EntityNotFoundException {
+    public void darBajaLogicaCategoria(Long id) {
         Categoria encontrada = categoriaDAO.buscarPorId(id);
         if (encontrada == null) {
-            throw new EntityNotFoundException("La categoria con ID " + id + " no existe o ya fue eliminada.");
+            throw new CategoriaNotFoundException("La categoria con ID " + id + " no existe o ya fue eliminada.");
         }
         categoriaDAO.eliminarLogico(id);
     }
-    public void actualizarCategoria(Long id, String nuevoNombre, String nuevaDescripcion) throws SQLException, EntityNotFoundException {
+    public void actualizarCategoria(Long id, String nuevoNombre, String nuevaDescripcion) {
     // Busca la categoria en la base de datos
     Categoria categoriaExistente = categoriaDAO.buscarPorId(id);
    
     if (categoriaExistente == null) {
-        throw new EntityNotFoundException("La categoría con ID " + id + " no existe.");
+        throw new CategoriaNotFoundException("La categoría con ID " + id + " no existe.");
     }
 
     categoriaExistente.setNombre(nuevoNombre);
