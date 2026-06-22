@@ -7,8 +7,6 @@ import integrado.prog2.dao.CategoriaDAO;
 import integrado.prog2.entities.Categoria;
 import integrado.prog2.exception.CategoriaException;
 import integrado.prog2.exception.CategoriaNotFoundException;
-import integrado.prog2.exception.EntityNotFoundException;
-import java.sql.SQLException;
 import java.util.List;
 
 

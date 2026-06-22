@@ -2,10 +2,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package foodstore;
+package integrado.prog2;
+import integrado.prog2.config.ConexionDB;
 import integrado.prog2.dao.CategoriaDAO;
+import integrado.prog2.menus.ProductoMenu;
 import integrado.prog2.service.FoodStoreService;
-import integrado.prog2.exception.EntityNotFoundException;
 import java.util.Scanner;
 
 
@@ -18,12 +19,14 @@ public class Main {
     private static final FoodStoreService servicio = new FoodStoreService(categoriaDAO);
     private static final Scanner leer = new Scanner(System.in);
 
+    private static final ProductoMenu productoMenu = new ProductoMenu();
+
     public static void main(String[] args) {
         int opcion;
         // PRUEBA DE CONEXION PROVISORIA
         try {
             System.out.println("Intentando conectar a pedidos_db...");
-            java.sql.Connection testCon = integrado.prog2.config.ConexionDB.getConexion();
+            java.sql.Connection testCon = ConexionDB.getConexion();
             if (testCon != null && !testCon.isClosed()) {
                 System.out.println("==================================================================");
                 System.out.println("¡EXITO TOTAL! Tu cOdigo de NetBeans se conectó perfectamente a MySQL.");
@@ -48,7 +51,8 @@ public class Main {
 
             switch (opcion) {
                 case 1 -> menuCategorias();
-                case 2, 3, 4 -> System.out.println("[Proximamente] ");
+                case 2 -> productoMenu.mostrar();
+                case 3, 4 -> System.out.println("[Proximamente] ");
                 case 0 -> System.out.println("Saliendo del sistema...");
             }
         } while (opcion != 0);
@@ -118,15 +122,15 @@ public class Main {
                     System.out.println("Opcion no valida. Intente de nuevo.");
                 }
             }
-        } catch (NumberFormatException e) {
-            System.out.println("Error: ¡Debe ingresar un numero valido!");
-            op = -1; // Seteamos un valor cualquiera para que el bucle continúe si escriben letras
-        
-        } catch (Exception e) {
-            System.out.println("Error de Persistencia: " + e.getMessage());
-            op = -1;
-        }
-        
-    } while (op != 0); // El bucle se repetira mientras la opcion no sea 0
-}
+            } catch (NumberFormatException e) {
+                System.out.println("Error: ¡Debe ingresar un numero valido!");
+                op = -1; // Seteamos un valor cualquiera para que el bucle continúe si escriben letras
+
+            } catch (Exception e) {
+                System.out.println("Error de Persistencia: " + e.getMessage());
+                op = -1;
+            }
+
+        } while (op != 0); // El bucle se repetira mientras la opcion no sea 0
+    }
 }
