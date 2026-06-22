@@ -1,5 +1,3 @@
--- schema.sql
-
 CREATE DATABASE IF NOT EXISTS pedidos_db;
 USE pedidos_db;
 
@@ -23,6 +21,30 @@ CREATE TABLE productos (
     categoria_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (categoria_id) REFERENCES categoria(id)
+);
+
+CREATE TABLE pedido (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fecha DATE NOT NULL,
+    estado VARCHAR(50) NOT NULL,
+    total DOUBLE NOT NULL,
+    forma_pago VARCHAR(50),
+    usuario_id BIGINT NOT NULL,
+    eliminado BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuario(id)
+);
+
+CREATE TABLE detalle_pedido (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    cantidad INT NOT NULL,
+    subtotal DOUBLE NOT NULL,
+    pedido_id BIGINT NOT NULL,
+    producto_id BIGINT NOT NULL,
+    eliminado BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (pedido_id) REFERENCES pedido(id),
+    FOREIGN KEY (producto_id) REFERENCES productos(id)
 );
 
 -- Datos de prueba: 2 categorías
