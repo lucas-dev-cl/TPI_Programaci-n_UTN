@@ -2,20 +2,24 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package foodstore;
+package integrado.prog2;
+
 import integrado.prog2.dao.CategoriaDAO;
+import integrado.prog2.dao.UsuarioDAO;
 import integrado.prog2.service.FoodStoreService;
 import integrado.prog2.exception.EntityNotFoundException;
 import java.util.Scanner;
-
+import integrado.prog2.enums.Rol;
 
 /**
  *
  * @author Lila
  */
 public class Main {
+
     private static final CategoriaDAO categoriaDAO = new CategoriaDAO();
-    private static final FoodStoreService servicio = new FoodStoreService(categoriaDAO);
+    private static final UsuarioDAO usuarioDAO = new UsuarioDAO();
+    private static final FoodStoreService servicio = new FoodStoreService(categoriaDAO, usuarioDAO);
     private static final Scanner leer = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -47,86 +51,137 @@ public class Main {
             opcion = Integer.parseInt(leer.nextLine());
 
             switch (opcion) {
-                case 1 -> menuCategorias();
-                case 2, 3, 4 -> System.out.println("[Proximamente] ");
-                case 0 -> System.out.println("Saliendo del sistema...");
+                case 1 ->
+                    menuCategorias();
+                case 2 ->
+                    System.out.println("[Proximamente] ");
+                case 3 ->
+                    menuUsuarios();
+                case 0 ->
+                    System.out.println("Saliendo del sistema...");
             }
         } while (opcion != 0);
     }
-
     private static void menuCategorias() {
-    int op; // Declaramos la variable fuera para que la condición del while pueda leerla
-    
-    do {
-        System.out.println("\n--- SUB MENU GESTION DE CATEGORIAS ---");
-        System.out.println("1. Listar todas las Categorias Activas");
-        System.out.println("2. Crear nueva Categoria");
-        System.out.println("3. Eliminar Categoria ");
-        System.out.println("4. Actualizar Categoria ");
-        System.out.println("0. Volver al menu principal");
-        System.out.print("Seleccione una opcion: ");
-        
-        try {
+        int op; // Declaramos la variable fuera para que la condición del while pueda leerla
+
+        do {
+            System.out.println("\n--- SUB MENU GESTION DE CATEGORIAS ---");
+            System.out.println("1. Listar todas las Categorias Activas");
+            System.out.println("2. Crear nueva Categoria");
+            System.out.println("3. Eliminar Categoria ");
+            System.out.println("4. Actualizar Categoria ");
+            System.out.println("0. Volver al menu principal");
+            System.out.print("Seleccione una opcion: ");
+
+            try {
+                op = Integer.parseInt(leer.nextLine());
+
+                switch (op) {
+                    case 1 -> {
+                        var listaActivas = servicio.obtenerCategoriasActivas();
+                        if (listaActivas.isEmpty()) {
+                            System.out.println("No se encontraron categorias registradas.");
+                        } else {
+                            System.out.println("\n--- CATEGORIAS ENCONTRADAS ---");
+                            listaActivas.forEach(System.out::println);
+                        }
+                    }
+
+                    case 2 -> {
+                        System.out.print("Ingrese nombre de la categoria: ");
+                        String nom = leer.nextLine();
+                        System.out.print("Ingrese descripcion de la categoria: ");
+                        String desc = leer.nextLine();
+                        servicio.registrarCategoria(nom, desc);
+                        System.out.println("¡Categoria guardada exitosamente en MySQL!");
+                    }
+
+                    case 3 -> {
+                        System.out.print("Ingrese el ID de la categoria a dar de baja: ");
+                        Long id = Long.parseLong(leer.nextLine());
+                        servicio.darBajaLogicaCategoria(id);
+                        System.out.println("¡Baja logica aplicada con exito!");
+                    }
+
+                    case 4 -> {
+                        System.out.print("Ingrese el ID de la categoria para actualizarla: ");
+                        Long id = Long.parseLong(leer.nextLine());
+
+                        System.out.print("Ingrese el nuevo nombre: ");
+                        String nuevoNombre = leer.nextLine();
+
+                        System.out.print("Ingrese la nueva descripcion: ");
+                        String nuevaDescripcion = leer.nextLine();
+
+                        servicio.actualizarCategoria(id, nuevoNombre, nuevaDescripcion);
+                        System.out.println("Actualizacion exitosa!");
+                    }
+
+                    case 0 -> {
+                        System.out.println("Regresando al men principal...");
+                    }
+
+                    default -> {
+                        System.out.println("Opcion no valida. Intente de nuevo.");
+                    }
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error: ¡Debe ingresar un numero valido!");
+                op = -1; // Seteamos un valor cualquiera para que el bucle continúe si escriben letras
+
+            } catch (Exception e) {
+                System.out.println("Error de Persistencia: " + e.getMessage());
+                op = -1;
+            }
+
+        } while (op != 0); // El bucle se repetira mientras la opcion no sea 0
+    }
+
+    private static void menuUsuarios() {
+
+        int op;
+
+        do {
+
+            System.out.println("\n--- GESTION DE USUARIOS ---");
+            System.out.println("1. Listar usuarios");
+            System.out.println("2. Crear usuario");
+            System.out.println("3. Modificar usuario");
+            System.out.println("4. Eliminar usuario");
+            System.out.println("0. Volver");
+
             op = Integer.parseInt(leer.nextLine());
 
             switch (op) {
+
                 case 1 -> {
-                    var listaActivas = servicio.obtenerCategoriasActivas();
-                    if (listaActivas.isEmpty()) {
-                        System.out.println("No se encontraron categorias registradas.");
-                    } else {
-                        System.out.println("\n--- CATEGORIAS ENCONTRADAS ---");
-                        listaActivas.forEach(System.out::println);
-                    }
+                    servicio.obtenerUsuariosActivos()
+                            .forEach(System.out::println);
                 }
-                
+
                 case 2 -> {
-                    System.out.print("Ingrese nombre de la categoria: ");
-                    String nom = leer.nextLine();
-                    System.out.print("Ingrese descripcion de la categoria: ");
-                    String desc = leer.nextLine();
-                    servicio.registrarCategoria(nom, desc);
-                    System.out.println("¡Categoria guardada exitosamente en MySQL!");
-                }
-                
-                case 3 -> {
-                    System.out.print("Ingrese el ID de la categoria a dar de baja: ");
-                    Long id = Long.parseLong(leer.nextLine());
-                    servicio.darBajaLogicaCategoria(id);
-                    System.out.println("¡Baja logica aplicada con exito!");
-                }
-                
-                case 4 -> {
-                    System.out.print("Ingrese el ID de la categoria para actualizarla: ");
-                    Long id = Long.parseLong(leer.nextLine());
 
-                    System.out.print("Ingrese el nuevo nombre: ");
-                    String nuevoNombre = leer.nextLine();
-                        
-                    System.out.print("Ingrese la nueva descripcion: ");
-                    String nuevaDescripcion = leer.nextLine();
+                    System.out.print("Nombre: ");
+                    String nombre = leer.nextLine();
 
-                    servicio.actualizarCategoria(id, nuevoNombre, nuevaDescripcion);
-                    System.out.println("Actualizacion exitosa!");
-                }
-                
-                case 0 -> {
-                    System.out.println("Regresando al men principal...");
-                }
-                
-                default -> {
-                    System.out.println("Opcion no valida. Intente de nuevo.");
+                    System.out.print("Apellido: ");
+                    String apellido = leer.nextLine();
+
+                    System.out.print("Mail: ");
+                    String mail = leer.nextLine();
+
+                    System.out.print("Celular: ");
+                    String celular = leer.nextLine();
+
+                    System.out.print("Contraseña: ");
+                    String pass = leer.nextLine();
+
+                    servicio.registrarUsuario(nombre, apellido, mail, celular, pass, Rol.USUARIO);
+                    System.out.println("Usuario creado.");
                 }
             }
-        } catch (NumberFormatException e) {
-            System.out.println("Error: ¡Debe ingresar un numero valido!");
-            op = -1; // Seteamos un valor cualquiera para que el bucle continúe si escriben letras
-        
-        } catch (Exception e) {
-            System.out.println("Error de Persistencia: " + e.getMessage());
-            op = -1;
-        }
-        
-    } while (op != 0); // El bucle se repetira mientras la opcion no sea 0
-}
+
+        } while (op != 0);
+    }
 }
