@@ -3,7 +3,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package integrado.prog2.entities;
-import java.time.LocalDateTime;
 
 /**
  *
@@ -12,7 +11,6 @@ import java.time.LocalDateTime;
 public abstract class Base {
     private Long id;
     private boolean eliminado;
-
 
     public Base() {
         this.eliminado = false;

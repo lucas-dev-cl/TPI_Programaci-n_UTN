@@ -6,6 +6,7 @@ package integrado.prog2.dao;
 import integrado.prog2.config.ConexionDB;
 import integrado.prog2.entities.Categoria;
 import integrado.prog2.exception.DataAccessException;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
