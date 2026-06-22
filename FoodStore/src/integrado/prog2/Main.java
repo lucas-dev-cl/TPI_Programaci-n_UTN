@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package foodstore;
+import integrado.prog2.dao.CategoriaDAO;
 import integrado.prog2.service.FoodStoreService;
 import integrado.prog2.exception.EntityNotFoundException;
 import java.util.Scanner;
@@ -13,7 +14,8 @@ import java.util.Scanner;
  * @author Lila
  */
 public class Main {
-    private static final FoodStoreService servicio = new FoodStoreService();
+    private static final CategoriaDAO categoriaDAO = new CategoriaDAO();
+    private static final FoodStoreService servicio = new FoodStoreService(categoriaDAO);
     private static final Scanner leer = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -119,9 +121,7 @@ public class Main {
         } catch (NumberFormatException e) {
             System.out.println("Error: ¡Debe ingresar un numero valido!");
             op = -1; // Seteamos un valor cualquiera para que el bucle continúe si escriben letras
-        } catch (EntityNotFoundException e) {
-            System.out.println("Error de Entidad: " + e.getMessage());
-            op = -1;
+        
         } catch (Exception e) {
             System.out.println("Error de Persistencia: " + e.getMessage());
             op = -1;
